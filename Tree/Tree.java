@@ -1,5 +1,15 @@
 import java.util.*;
 
+//structure of tree
+class Node{
+    int data;
+    Node left = null;
+    Node right = null;
+    Node(int data){
+        this.data = data;
+    }
+}
+
 //used in pre in post in one traversal
 class Tuple{
     Node root;
@@ -10,13 +20,25 @@ class Tuple{
     }
 }
 
-//structure of tree
-class Node{
-    int data;
-    Node left = null;
-    Node right = null;
-    Node(int data){
-        this.data = data;
+//used in vertical traversal
+class Tuple2{
+    Node root;
+    int row;
+    int col;
+    Tuple2(Node root, int row, int col){
+        this.root = root;
+        this.row = row;
+        this.col = col;
+    }
+}
+
+//used in top view
+class Tuple3{
+    Node node;
+    int x;
+    Tuple3(Node node, int x){
+        this.node = node;
+        this.x = x;
     }
 }
 
@@ -144,10 +166,13 @@ public class Tree {
         System.out.println("Postorder: " + post);
     }
 
+    //boundary traversal
+    //check for leaf nodes
     static boolean isLeaf(Node node){
         return node != null && node.left == null && node.right == null;
     }
 
+    //adding left boundary except leaf nodes
     static void addLeftBoundary(Node node, List<Integer> list){
         Node curr = node;
         while(curr != null){
@@ -159,6 +184,7 @@ public class Tree {
         }
     }
 
+    //adding leaf nodes
     static void addLeafNodes(Node node, List<Integer> list){
         if (node == null) return;
 
@@ -170,6 +196,7 @@ public class Tree {
         addLeafNodes(node.right, list);
     }
 
+    //adding right boundary except leaf nodes in reverse dir
     static void addRightBoundary(Node node, List<Integer> list){
         Stack<Integer> st = new Stack<>();
         Node curr = node;
@@ -183,6 +210,7 @@ public class Tree {
         }
     }
 
+    //main boundary func
     static List<Integer> boundary(Node root){
         List<Integer> list = new ArrayList<>();
         if (root == null) return list;
@@ -191,6 +219,140 @@ public class Tree {
         addLeafNodes(root, list);
         addRightBoundary(root.right, list);
         return list;
+    }
+
+    //vertical traversal
+    static List<List<Integer>> verticalTravel(Node root){
+        List<List<Integer>> list = new ArrayList<>();
+        if (root == null) return list;
+        Queue<Tuple2> q = new ArrayDeque<>();
+        q.offer(new Tuple2(root, 0, 0));
+        TreeMap<Integer, TreeMap<Integer, PriorityQueue<Integer>>> map = new TreeMap<>();
+        while (!q.isEmpty()){
+            Tuple2 curr = q.poll();
+            Node node = curr.root;
+            int row = curr.row;
+            int col = curr.col;
+            map.putIfAbsent(col, new TreeMap<>());
+            map.get(col).putIfAbsent(row, new PriorityQueue<>());
+            map.get(col).get(row).offer(node.data);
+            if (node.left != null) q.offer(new Tuple2(node.left, row + 1, col - 1));
+            if (node.right != null) q.offer(new Tuple2(node.right, row + 1, col + 1));
+        }
+        for (TreeMap<Integer,PriorityQueue<Integer>> something : map.values()){
+            List<Integer> arr = new ArrayList<>();
+            for (PriorityQueue<Integer> haaa : something.values()){
+                while (!haaa.isEmpty()){
+                    arr.add(haaa.poll());
+                }
+            }
+            list.add(arr);
+        }
+        return list;
+    }
+
+    //top view
+    static ArrayList<Integer> topView(Node root) {
+        // code here
+        ArrayList<Integer> arr = new ArrayList<>();
+        if (root == null) return arr;
+        Queue<Tuple3> q = new ArrayDeque<>();
+        TreeMap<Integer, ArrayList<Integer>> map = new TreeMap<>();
+        q.offer(new Tuple3(root, 0));
+        while (!q.isEmpty()){
+            Tuple3 curr = q.poll();
+            Node node = curr.node;
+            int x = curr.x;
+            map.putIfAbsent(x, new ArrayList<>());
+            map.get(x).add(node.data);
+            if (node.left != null) q.offer(new Tuple3(node.left, x - 1));
+            if (node.right != null) q.offer(new Tuple3(node.right, x + 1));
+        }
+        for (ArrayList<Integer> haaa : map.values()){
+            arr.add(haaa.get(0));
+        }
+        return arr;
+    }
+
+    //bottom view
+    static ArrayList<Integer> bottomView(Node root) {
+        // code here
+        ArrayList<Integer> arr = new ArrayList<>();
+        if (root == null) return arr;
+        Queue<Tuple3> q = new ArrayDeque<>();
+        q.offer(new Tuple3(root, 0));
+        TreeMap<Integer, ArrayList<Integer>> map = new TreeMap<>();
+        while (!q.isEmpty()){
+                Tuple3 curr = q.poll();
+                Node node = curr.node;
+                int x = curr.x;
+                map.putIfAbsent(x, new ArrayList<>());
+                map.get(x).add(node.data);
+                if (node.left != null) q.offer(new Tuple3(node.left, x - 1));
+                if (node.right != null) q.offer(new Tuple3(node.right, x + 1));
+        }
+        for (ArrayList<Integer> haaa : map.values()){
+            arr.add(haaa.get(haaa.size() - 1));
+        }
+        return arr;
+    }
+
+    //right view
+    static ArrayList<Integer> rightView(Node root) {
+        ArrayList<Integer> arr = new ArrayList<>();
+        if (root == null) return arr;
+        Queue<Tuple3> q = new ArrayDeque<>();
+        TreeMap<Integer, ArrayList<Integer>> map = new TreeMap<>();
+        q.offer(new Tuple3(root, 0));
+        while (!q.isEmpty()){
+            Tuple3 curr = q.poll();
+            Node node = curr.node;
+            int x = curr.x;
+            map.putIfAbsent(x, new ArrayList<>());
+            map.get(x).add(node.data);
+            if (node.left != null) q.offer(new Tuple3(node.left, x + 1));
+            if (node.right != null) q.offer(new Tuple3(node.right, x + 1));
+        }
+        for (ArrayList<Integer> haaa : map.values()){
+            arr.add(haaa.get(haaa.size() - 1));
+        }
+        return arr;
+    }
+
+    //left view
+    static ArrayList<Integer> leftView(Node root) {
+        ArrayList<Integer> arr = new ArrayList<>();
+        if (root == null) return arr;
+        Queue<Tuple3> q = new ArrayDeque<>();
+        TreeMap<Integer, ArrayList<Integer>> map = new TreeMap<>();
+        q.offer(new Tuple3(root, 0));
+        while (!q.isEmpty()){
+            Tuple3 curr = q.poll();
+            Node node = curr.node;
+            int x = curr.x;
+            map.putIfAbsent(x, new ArrayList<>());
+            map.get(x).add(node.data);
+            if (node.left != null) q.offer(new Tuple3(node.left, x + 1));
+            if (node.right != null) q.offer(new Tuple3(node.right, x + 1));
+        }
+        for (ArrayList<Integer> haaa : map.values()){
+            arr.add(haaa.get(0));
+        }
+        return arr;
+    }
+
+    //root to leaf all paths
+    static void dfs(Node root, List<Integer> path, List<List<Integer>> ans){
+        if (root == null) return;
+        path.add(root.data);
+        if (root.left == null && root.right == null){
+            ans.add(new ArrayList<>(path));
+        } 
+        else{
+            dfs(root.left, path, ans);
+            dfs(root.right, path, ans);
+        }
+        path.remove(path.size() - 1);
     }
 
     //max depth or height of tree
@@ -282,7 +444,19 @@ public class Tree {
         // System.out.println(maxi2[0]);
         // List<Integer> list = boundary(root);
         // System.out.println(list);
-        System.out.println(isSymmetric(root.left, root.right));
+        //System.out.println(isSymmetric(root.left, root.right));
+        //List<List<Integer>> ans = verticalTravel(root);
+        //System.out.println(ans);
+        // ArrayList<Integer> topi = topView(root);
+        // System.out.println(topi);
+        // ArrayList<Integer> boti = bottomView(root);
+        // System.out.println(boti);
+        // ArrayList<Integer> lifi = leftView(root);
+        // System.out.println(lifi);
+        // List<Integer> path = new ArrayList<>();
+        // List<List<Integer>> ans = new ArrayList<>();
+        // dfs(root, path, ans);
+        // System.out.println(ans);
         sc.close();
     }
 }
