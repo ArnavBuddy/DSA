@@ -1,5 +1,7 @@
 import java.util.*;
 
+import javax.swing.tree.TreeNode;
+
 //structure of tree
 class Node{
     int data;
@@ -406,6 +408,136 @@ public class Tree {
         return isSymmetric(left.left, right.right) && isSymmetric(left.right, right.left);
     }
 
+    //does tree follows child sum prop ?
+    static int func(Node root){
+        if (root == null) return 0;
+        return root.data;
+    }
+
+    static boolean isSumProperty(Node root) {
+        //  code here
+        //base case
+        if (root == null || (root.left == null && root.right == null)) return true;
+        int left = func(root.left);
+        int right = func(root.right);
+        if (left + right != root.data) return false;
+        return isSumProperty(root.left) && isSumProperty(root.right);
+    }
+
+    //child sum prop variant 2 - make it follow child sum
+    static boolean isSumProperty2(Node root){
+        if (root == null || (root.left == null && root.right == null)) return true;
+        int left = func(root.left);
+        int right = func(root.right);
+        if (left + right > root.data){
+            root.data = left + right;
+        }
+        else{
+            if (root.left != null) root.left.data = root.data;
+            if (root.right != null) root.right.data = root.data;
+        }
+        return isSumProperty2(root.left) && isSumProperty2(root.right);
+    }
+
+    static int funcy(Node root){
+        if (root == null || (root.left == null && root.right == null)) return root.data;
+        int left = funcy(root.left);
+        int right = funcy(root.right);
+        root.data = left + right;
+        return root.data;
+    }
+
+    //lowest common ancestor
+    static Node lca(Node root, int p, int q){
+        if (root == null || root.data == p || root.data == q) return root;
+        Node left = lca(root.left, p, q);
+        Node right = lca(root.right, p, q);
+        if (left == null) return right;
+        else if (right == null) return left;
+        else return root;
+    }
+
+    //max width
+    static int widthOfBinaryTree(Node root) {
+        if (root == null) return 0;
+        Queue<Tuple3> q = new ArrayDeque<>();
+        q.offer(new Tuple3(root, 0));
+        int width = 0;
+        while (!q.isEmpty()){
+            int first = 0;
+            int last = 0;
+            int min = q.peek().node.data;
+            int size = q.size();
+            for (int i = 0; i < size; i++){
+                Tuple3 curr = q.poll();
+                Node node = curr.node;
+                int x = curr.x;
+                if (i == 0) first = x;
+                if (i == size - 1) last = x;
+                if (node.left != null) q.offer(new Tuple3(node.left, 2 * x + 1));
+                if (node.right != null) q.offer(new Tuple3(node.right, 2 * x + 2));
+            }
+            width = Math.max(width, (last - first) + 1);
+        }
+        return width;
+    }
+
+    //root to node
+    static boolean root2Node(Node root, Node target, ArrayList<Integer> list){
+        if (root == null) return false;
+        list.add(root.data);
+        if (root == target) return true;
+        boolean left = root2Node(root.left, target, list);
+        boolean right = root2Node(root.right, target, list);
+        if (left == true ||  right == true) return true;
+        else{
+            list.remove(list.size() - 1);
+            return false;
+        }
+    }
+
+    //BT using inorder & preorder
+    static Node buildTreeInPre(int[] preorder, int[] inorder) {
+        HashMap<Integer, Integer> map = new HashMap<>();
+        int len = inorder.length;
+        for (int i = 0; i < len; i++){
+            map.put(inorder[i], i);
+        }
+        Node root = funcInPre(inorder, 0, len - 1, preorder, 0, len - 1, map);
+        return root;
+    }
+    static Node funcInPre(int[] inorder, int ins, int ine, int[] preorder, int pres, int pree, HashMap<Integer, Integer> map){
+        if (pres > pree || ins > ine) return null;
+        Node root = new Node(preorder[pres]);
+        int inR = map.get(preorder[pres]);
+        int numsLeft = inR - ins;
+        root.left = funcInPre(inorder, ins, inR - 1, preorder, pres + 1, pres + numsLeft, map);
+        root.right = funcInPre(inorder, inR + 1, ine, preorder, pres + numsLeft + 1, pree, map);
+        return root;
+    }
+
+    //BT using inorder & postorder
+    static Node buildTreeInPost(int[] inorder, int[] postorder) {
+        int len = inorder.length;
+        HashMap<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i < len; i++){
+            map.put(inorder[i], i);
+        }
+        Node root = funcInPost(inorder, 0, len - 1, postorder, 0, len - 1, map);
+        return root;
+    }
+    static Node funcInPost(int[] inorder, int ins, int ine, int[] postorder, int posts, int poste, HashMap<Integer, Integer> map){
+        if (ins > ine || posts > poste) return null;
+        Node root = new Node(postorder[poste]);
+        int inR = map.get(postorder[poste]);
+        int numsLeft = inR - ins;
+        root.left = funcInPost(inorder, ins, inR - 1, postorder, posts, posts + numsLeft - 1, map);
+        root.right = funcInPost(inorder, inR + 1, ine, postorder, posts + numsLeft, poste - 1, map);
+        return root;
+    }
+
+
+
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         int n = sc.nextInt();
@@ -457,6 +589,17 @@ public class Tree {
         // List<List<Integer>> ans = new ArrayList<>();
         // dfs(root, path, ans);
         // System.out.println(ans);
+        // Node bahah = lca(root, 8,9);
+        // System.out.println(bahah.data);
+        //System.out.println(widthOfBinaryTree(root));
+        // ArrayList<Integer> haaa = new ArrayList<>();
+        // root2Node(root, root, haaa);
+        // System.out.println(haaa);
+        //System.out.println(isSumProperty(root));
+        // System.out.println(levelOrder(root));
+        // isSumProperty2(root);
+        // funcy(root);
+        // System.out.println(levelOrder(root));
         sc.close();
     }
 }
