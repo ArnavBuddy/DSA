@@ -84,6 +84,34 @@ public class Tree {
         inOrder(root.right);
     }
 
+    //morris inorder sc -> O(1)
+    public List<Integer> inorderTraversal(Node root) {
+        Node curr = root;
+        ArrayList<Integer> list = new ArrayList<>();
+        while(curr != null){
+            if (curr.left == null){
+                list.add(curr.data);
+                curr = curr.right;
+            }
+            else{
+                Node prev = curr.left;
+                while (prev.right != null && prev.right != curr){
+                    prev = prev.right;
+                }
+                if(prev.right == null){
+                    prev.right = curr;
+                    curr = curr.left;
+                }
+                else{
+                    prev.right = null;
+                    list.add(curr.data);
+                    curr = curr.right;
+                }
+            }
+        }
+        return list;
+    }
+
     //postorder traversal
     static void postOrder(Node root){
         if (root == null) return;
@@ -534,6 +562,66 @@ public class Tree {
         root.left = funcInPost(inorder, ins, inR - 1, postorder, posts, posts + numsLeft - 1, map);
         root.right = funcInPost(inorder, inR + 1, ine, postorder, posts + numsLeft, poste - 1, map);
         return root;
+    }
+
+    //serialize and deserialize BT
+    // Encodes a tree to a single string.
+    static String serialize(Node root) {
+        if (root == null) return "";
+        Queue<Node> q = new LinkedList<>();
+        StringBuilder res = new StringBuilder();
+        q.add(root);
+        while (!q.isEmpty()){
+            Node curr = q.poll();
+            if (curr == null){
+                res.append("# ");
+                continue;
+            }
+            res.append(curr.data + " ");
+            q.add(curr.left);
+            q.add(curr.right);
+        }
+        return res.toString();
+    }
+
+    // Decodes your encoded data to tree.
+    static Node deserialize(String data) {
+        if (data.isEmpty()) return null;
+        String[] list = data.split(" ");
+        Queue<Node> q = new ArrayDeque<>();
+        Node root = new Node(Integer.parseInt(list[0]));
+        q.add(root);
+        for (int i = 1; i < list.length; i++){
+            Node curr = q.poll();
+            if (!list[i].equals("#")){
+                Node left = new Node(Integer.parseInt(list[i]));
+                curr.left = left;
+                q.add(left);
+            }
+            if (!list[++i].equals("#")){
+                Node right = new Node(Integer.parseInt(list[i]));
+                curr.right = right;
+                q.add(right);
+            }
+        }
+        return root;
+    }
+
+    //BT -> LL using morris
+    public void flatten(Node root) {
+        Node curr = root;
+        while (curr != null){
+            if (curr.left != null){
+                Node haaa = curr.left;
+                while (haaa.right != null){
+                    haaa = haaa.right;
+                }
+                haaa.right = curr.right;
+                curr.right = curr.left;
+                curr.left = null;
+            }
+            curr = curr.right;
+        }
     }
 
 
