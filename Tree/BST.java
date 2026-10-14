@@ -156,4 +156,80 @@ class BST{
         }
         return root;
     }
+
+    //kth smallest element in BST
+    public int kthSmallest(TreeNode root, int k) {
+        if (root == null) return -1;
+        int cnt = 0;
+        TreeNode curr = root;
+        while (curr != null){
+            if (curr.left == null){
+                cnt++;
+                if (cnt == k) return curr.val;
+                curr = curr.right;
+            }
+            else{
+                TreeNode maxi = func(curr.left, curr);
+                if (maxi.right == null){
+                    maxi.right = curr;
+                    curr = curr.left;
+                }
+                else{
+                    maxi.right = null;
+                    cnt++;
+                    if (cnt == k) return curr.val;
+                    curr = curr.right;
+                }
+            }
+        }
+        return -1;
+    }
+
+    private TreeNode func(TreeNode root, TreeNode curr){
+        if (root == null) return null;
+        while(root.right != null && root.right != curr){
+            root = root.right;
+        }
+        return root;
+    }
+
+    //kth largest element in BST
+    private void count(Node root, int[] n){
+        if (root == null) return;
+        n[0]++;
+        count(root.left, n);
+        count(root.right, n);
+    }
+    
+    public int kthLargest(Node root, int k) {
+        // code here
+        int ans = -1;
+        if (root == null) return ans;
+        int[] n = new int[1];
+        n[0] = 0;
+        count(root, n);
+        int cnt = 0;
+        Node curr = root;
+        while (curr != null){
+            if (curr.left == null){
+                cnt++;
+                if (cnt == n[0] - k + 1) ans = curr.data;
+                curr = curr.right;
+            }
+            else{
+                Node maxi = func(curr.left, curr);
+                if (maxi.right == null){
+                    maxi.right = curr;
+                    curr = curr.left;
+                }
+                else{
+                    maxi.right = null;
+                    cnt++;
+                    if (cnt == n[0] - k + 1) ans = curr.data;
+                    curr = curr.right;
+                }
+            }
+        }
+        return ans;
+    }
 }
